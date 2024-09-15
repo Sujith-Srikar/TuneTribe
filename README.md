@@ -1,5 +1,4 @@
-TuneTribe
-This is a is a sleek and simple web application built with React and Vite, allowing users to search for their favorite music tracks using the Spotify API powered by Nocode API.
+TuneTribe is a is a sleek and simple web application built with React and Vite, allowing users to search for their favorite music tracks using the Spotify API powered by Nocode API.
 With this app, users can search for songs, view track details, and even listen to track previews.
 
 🚀 Demo
