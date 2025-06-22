@@ -23,26 +23,28 @@ export default function Search() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-center relative z-10 w-full"
+      className="relative w-full max-w-md mx-auto"
     >
-      <Button
-        variant="ghost"
-        type="submit"
-        size="icon"
-        className="absolute right-0 rounded-xl rounded-l-none bg-none"
-      >
-        <SearchIcon className="w-4 h-4" />
-      </Button>
-      <Input
-        ref={inpRef}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        autoComplete="off"
-        type="search"
-        className="rounded-lg bg-[#18181A]"
-        name="query"
-        placeholder="Try Searching..."
-      />
+      <div className="flex items-center w-full bg-[#18181A] rounded-full ring-1 ring-[#2a2a2c] focus-within:ring-gray-600 transition-all">
+        <input
+          ref={inpRef}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          autoComplete="off"
+          type="search"
+          name="query"
+          placeholder="Try searching..."
+          className="flex-1 bg-transparent px-4 py-2 text-white text-sm placeholder-gray-400 rounded-full focus:outline-none"
+        />
+
+        <button
+          type="submit"
+          className="p-2 rounded-full hover:bg-[#2a2a2c] transition-colors duration-150 mr-1"
+        >
+          <SearchIcon className="w-5 h-5 text-gray-300" />
+        </button>
+      </div>
     </form>
+
   );
 }

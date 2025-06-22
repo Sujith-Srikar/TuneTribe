@@ -1,5 +1,37 @@
 @import "tailwindcss";
 
+
+/* hide scrollbar by default */
+.custom-scroll {
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox hides it */
+}
+.custom-scroll::-webkit-scrollbar {
+  height: 6px;            /* horizontal scrollbar height */
+  opacity: 0;             /* hidden when not hovered */
+  transition: opacity .25s ease;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.4);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* reveal on hover of the wrapper group */
+.group:hover .custom-scroll::-webkit-scrollbar {
+  opacity: 1 !important;
+}
+.group:hover .custom-scroll {
+  scrollbar-width: thin;                                        /* Firefox */
+  scrollbar-color: rgba(255,255,255,0.4) transparent;            /* Firefox */
+}
+
+
+
 /* Inter font family */
 .inter-thin {
   font-family: "Inter", sans-serif;

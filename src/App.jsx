@@ -5,6 +5,8 @@ import { AudioPlayer } from "./components";
 import { MusicProvider } from "./context/MusicProvider";
 import "./index.css";
 import { Toaster } from "react-hot-toast";
+import SearchPage from "./pages/SearchPage"
+
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/player/:id" element={<AudioPlayer />} />
+            <Route path="/search/:id" element={<SearchPage />} />
+
           </Routes>
         </Router>
       </MusicProvider>

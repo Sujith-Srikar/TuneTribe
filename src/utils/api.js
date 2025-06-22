@@ -17,7 +17,7 @@ export const getSongsByQuery = async (query) => {
 
 export const getSongsByAlbum = async (query) => {
   try {
-    const response = await axios.get(`${apiUrl}/search/album`, {
+    const response = await axios.get(`${apiUrl}/search/albums`, {
       params: { query },
     });
 
@@ -46,7 +46,7 @@ export const getSongSuggestions = async (ids) => {
       const response = await axios.get(`${apiUrl}/songs/${ids}/suggestions`);
       return response.data;
   } catch (err) {
-      console.log("Error fetching Song Suggestions: ". err);
+      console.log("Error fetching Song Suggestions:" , err);
       throw err;
   }
 }
