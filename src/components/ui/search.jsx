@@ -39,7 +39,7 @@ export default function Search() {
         onChange={(e) => setQuery(e.target.value)}
         autoComplete="off"
         type="search"
-        className="rounded-lg bg-secondary/50"
+        className="rounded-lg bg-[#18181A]"
         name="query"
         placeholder="Try Searching..."
       />

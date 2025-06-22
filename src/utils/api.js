@@ -4,7 +4,20 @@ const apiUrl = import.meta.env.VITE_PUBLIC_API_URL;
 
 export const getSongsByQuery = async (query) => {
   try {
-    const response = await axios.get(`${apiUrl}/search`, {
+    const response = await axios.get(`${apiUrl}/search/songs`, {
+      params: { query },
+    });
+
+    return response.data;
+  } catch (err) {
+    console.error("Error fetching songs:", err);
+    throw err;
+  }
+};
+
+export const getSongsByAlbum = async (query) => {
+  try {
+    const response = await axios.get(`${apiUrl}/search/album`, {
       params: { query },
     });
 

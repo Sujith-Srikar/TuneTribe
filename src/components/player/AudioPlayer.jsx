@@ -5,6 +5,7 @@ import { useMusic } from "../../context/MusicProvider";
 import toast from "react-hot-toast";
 import { Play, Pause, RefreshCw, Download, Share2 } from "lucide-react";
 import { Button, Slider } from "../index";
+import {Navbar} from "../index";
 
 const Link = ({ href, className, children }) => {
   return (
@@ -271,23 +272,26 @@ function AudioPlayer() {
 
   return (
     <div className="bg-black min-h-screen text-white pb-20">
+      <Navbar />
       {/* Hidden audio element */}
       <audio ref={audioRef}></audio>
 
-      <div className="px-4 sm:px-6 py-8 max-w-4xl mx-auto">
+      <div className="px-4 sm:px-6 md:px-30 py-8 max-w-full mx-auto border border-red-900">
         <div className="flex flex-col md:flex-row gap-8 items-start">
           {/* Album Art */}
-          <div className="md:w-1/3">
+          <div className="md:w-1/8">
             <img
               src={data.image?.[2]?.url || ""}
               alt={data.name}
-              className="w-full aspect-square object-cover rounded-md shadow-lg"
+              className="w-full aspect-square object-cover rounded-2xl shadow-lg"
             />
           </div>
 
           {/* Song Information */}
-          <div className="md:w-2/3 flex flex-col">
-            <h1 className="text-4xl font-bold mb-1">{data.name}</h1>
+          <div className="md:w-full flex flex-col">
+            <h1 className="text-2xl font-Bricolage Grotesque mb-1">
+              {data.name}
+            </h1>
             <p className="text-lg text-zinc-400 mb-4">by {getArtistName()}</p>
 
             {/* Progress Bar */}

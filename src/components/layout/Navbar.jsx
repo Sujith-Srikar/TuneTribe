@@ -32,7 +32,7 @@ function Navbar() {
   const path = location.pathname;
 
   return (
-    <header className="grid gap-2 pt-5 px-5 pb-5 md:px-20 lg:px-32 border border-red-900">
+    <header className="grid gap-2 pt-5 px-5 pb-5 md:px-20 lg:px-32">
       <div className="flex items-center sm:justify-between w-full gap-2">
         {path == "/" ? (
           <div className="flex items-center gap-1">
@@ -52,7 +52,7 @@ function Navbar() {
         <div className="hidden sm:flex items-center gap-3 w-full max-w-md">
           <Search />
           {path != "/" && (
-            <Button className="h-10 px-3" asChild>
+            <Button className="h-10 px-3 bg-white text-black hover:opacity-90">
               <Link href="/" className="flex items-center gap-1">
                 <ChevronLeft className="w-4 h-4" />
                 Back
