@@ -4,18 +4,22 @@ import Dashboard from "./pages/Dashboard";
 import { AudioPlayer } from "./components";
 import { MusicProvider } from "./context/MusicProvider";
 import "./index.css";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
-    <MusicProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/player/:id" element={<AudioPlayer />} />
-        </Routes>
-      </Router>
-    </MusicProvider>
+    <>
+      <Toaster />
+      <MusicProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/player/:id" element={<AudioPlayer />} />
+          </Routes>
+        </Router>
+      </MusicProvider>
+    </>
   );
 }
 

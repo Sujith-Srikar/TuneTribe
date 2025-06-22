@@ -5,7 +5,7 @@ import { useMusic } from "../../context/MusicProvider";
 import toast from "react-hot-toast";
 import { Play, Pause, RefreshCw, Download, Share2 } from "lucide-react";
 import { Button, Slider } from "../index";
-import {Navbar} from "../index";
+import { Navbar } from "../index";
 
 const Link = ({ href, className, children }) => {
   return (
@@ -27,6 +27,7 @@ function AudioPlayer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [nextSong, setNextSong] = useState(null);
+  const [recommendedSongs, setRecommendedSongs] = useState([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLooping, setIsLooping] = useState(false);
@@ -64,7 +65,7 @@ function AudioPlayer() {
             setAudioUrl(songData.downloadUrl[0].url);
 
           localStorage.setItem("last-played", id);
-          fetchNextSong(id);
+          fetchRecommendedSongs(id);
         } else {
           setError("Song data not found");
         }
@@ -79,14 +80,19 @@ function AudioPlayer() {
     }
   };
 
-  const fetchNextSong = async (songId) => {
+  const fetchRecommendedSongs = async (songId) => {
     try {
       const res = await getSongSuggestions(songId);
       if (res.data && res.data.length > 0) {
-        setNextSong(res.data[0]);
+        // Get top 3 recommendations
+        const topRecommendations = res.data.slice(0, 3);
+        setRecommendedSongs(topRecommendations);
+
+        // Set the first song as the next song to play
+        setNextSong(topRecommendations[0]);
       }
     } catch (err) {
-      console.error("Error Fetching next song:", err);
+      console.error("Error Fetching recommended songs:", err);
     }
   };
 
@@ -157,10 +163,8 @@ function AudioPlayer() {
     }
   };
 
-  const playNextSong = () => {
-    if (nextSong && nextSong.id) {
-      navigate(`/player/${nextSong.id}`);
-    }
+  const playRecommendedSong = (songId) => {
+    navigate(`/player/${songId}`);
   };
 
   useEffect(() => {
@@ -171,6 +175,9 @@ function AudioPlayer() {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        setCurrentTime(0);
+        setCurrent(0);
       }
     };
   }, [id]);
@@ -190,7 +197,7 @@ function AudioPlayer() {
 
     const handleEnded = () => {
       if (!isLooping && nextSong) {
-        playNextSong();
+        playRecommendedSong(nextSong.id);
       }
     };
 
@@ -220,11 +227,11 @@ function AudioPlayer() {
     }
   }, [audioUrl]);
 
-  const getArtistName = () => {
-    if (data?.artists?.primary?.[0]?.name) {
-      return data.artists.primary[0].name;
+  const getArtistName = (song) => {
+    if (song?.artists?.primary?.[0]?.name) {
+      return song.artists.primary[0].name;
     }
-    return data?.primaryArtists || "Unknown Artist";
+    return song?.primaryArtists || "Unknown Artist";
   };
 
   if (loading) {
@@ -276,10 +283,10 @@ function AudioPlayer() {
       {/* Hidden audio element */}
       <audio ref={audioRef}></audio>
 
-      <div className="px-4 sm:px-6 md:px-30 py-8 max-w-full mx-auto border border-red-900">
+      <div className="px-4 sm:px-6 md:px-30 py-8 max-w-full mx-auto">
         <div className="flex flex-col md:flex-row gap-8 items-start">
           {/* Album Art */}
-          <div className="md:w-1/8">
+          <div className="md:w-1/7">
             <img
               src={data.image?.[2]?.url || ""}
               alt={data.name}
@@ -289,13 +296,15 @@ function AudioPlayer() {
 
           {/* Song Information */}
           <div className="md:w-full flex flex-col">
-            <h1 className="text-2xl font-Bricolage Grotesque mb-1">
+            <h1 className="text-xl font-Bricolage Grotesque mb-1">
               {data.name}
             </h1>
-            <p className="text-lg text-zinc-400 mb-4">by {getArtistName()}</p>
+            <p className="text-sm text-zinc-400 mb-2">
+              by {getArtistName(data)}
+            </p>
 
             {/* Progress Bar */}
-            <div className="mt-6 mb-2">
+            <div className="mt-4">
               <Slider
                 value={[currentTime]}
                 max={duration}
@@ -310,17 +319,17 @@ function AudioPlayer() {
             </div>
 
             {/* Controls */}
-            <div className="flex items-center justify-between mt-8">
+            <div className="flex items-center justify-between mt-4">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={togglePlayPause}
-                className="bg-amber-800 hover:bg-amber-700 rounded-full w-14 h-14 flex items-center justify-center"
+                className="bg-amber-800 hover:bg-amber-700 rounded-full w-10 h-8 flex items-center justify-center"
               >
                 {playing ? (
-                  <Pause className="h-7 w-7" />
+                  <Pause className="h-4 w-4" />
                 ) : (
-                  <Play className="h-7 w-7 ml-1" />
+                  <Play className="h-4 w-4 ml-1" />
                 )}
               </Button>
 
@@ -333,7 +342,7 @@ function AudioPlayer() {
                     isLooping ? "text-amber-500" : "text-white"
                   } hover:bg-transparent hover:opacity-75`}
                 >
-                  <RefreshCw className="h-5 w-5" />
+                  <RefreshCw className="h-4 w-4" />
                 </Button>
 
                 <Button
@@ -343,7 +352,7 @@ function AudioPlayer() {
                   disabled={isDownloading}
                   className="text-white hover:bg-transparent hover:opacity-75"
                 >
-                  <Download className="h-5 w-5" />
+                  <Download className="h-4 w-4" />
                 </Button>
 
                 <Button
@@ -352,50 +361,104 @@ function AudioPlayer() {
                   onClick={handleShare}
                   className="text-white hover:bg-transparent hover:opacity-75"
                 >
-                  <Share2 className="h-5 w-5" />
+                  <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Next Song Recommendation */}
-        {nextSong && (
+        {/* Song Recommendations */}
+        {recommendedSongs.length > 0 && (
           <div className="mt-16">
-            <h2 className="text-xl font-semibold mb-4">Recommendation</h2>
-            <p className="text-sm text-zinc-400 mb-4">You might like this</p>
-            <div
-              className="bg-neutral-800 rounded-md overflow-hidden hover:bg-neutral-700 transition-all cursor-pointer"
-              onClick={playNextSong}
-            >
-              <div className="p-4 flex items-center gap-4">
-                <div className="w-16 h-16 flex-shrink-0">
-                  {nextSong.image && nextSong.image[0] && (
-                    <img
-                      src={nextSong.image[0].url}
-                      alt={nextSong.name}
-                      className="w-full h-full object-cover rounded"
-                    />
-                  )}
-                </div>
+            <h2 className="text-xl font-semibold mb-2">Recommendations</h2>
+            <p className="text-sm text-zinc-400 mb-6">You might like these</p>
+            <div className="space-y-3">
+              {/* First song - next in autoplay */}
+              <div
+                className="bg-neutral-800 rounded-md overflow-hidden hover:bg-neutral-700 transition-all cursor-pointer"
+                onClick={() => playRecommendedSong(recommendedSongs[0].id)}
+              >
+                <div className="p-4 flex items-center gap-4">
+                  <div className="w-16 h-16 flex-shrink-0">
+                    {recommendedSongs[0].image && (
+                      <img
+                        src={
+                          recommendedSongs[0].image.find(
+                            (img) => img.quality === "150x150"
+                          )?.url || recommendedSongs[0].image[0]?.url
+                        }
+                        alt={recommendedSongs[0].name}
+                        className="w-full h-full object-cover rounded"
+                      />
+                    )}
+                  </div>
 
-                <div className="flex-grow min-w-0">
-                  <h3 className="font-medium text-white truncate">
-                    {nextSong.name}
-                  </h3>
-                  <p className="text-zinc-400 text-sm truncate">
-                    {nextSong.primaryArtists || "Unknown Artist"}
-                  </p>
-                </div>
+                  <div className="flex-grow min-w-0">
+                    <h3 className="font-medium text-white truncate">
+                      {recommendedSongs[0].name}
+                    </h3>
+                    <p className="text-zinc-400 text-sm truncate">
+                      {getArtistName(recommendedSongs[0])}
+                    </p>
+                    <p className="text-amber-500 text-xs">
+                      Plays next • {formatTime(recommendedSongs[0].duration)}
+                    </p>
+                  </div>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="bg-amber-800 hover:bg-amber-700 rounded-full h-10 w-10 flex items-center justify-center flex-shrink-0"
-                >
-                  <Play className="h-5 w-5 ml-0.5" />
-                </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-amber-800 hover:bg-amber-700 rounded-full h-10 w-10 flex items-center justify-center flex-shrink-0"
+                  >
+                    <Play className="h-5 w-5 ml-0.5" />
+                  </Button>
+                </div>
               </div>
+
+              {/* Second and third recommendations */}
+              {recommendedSongs.slice(1, 3).map((song, index) => (
+                <div
+                  key={song.id}
+                  className="bg-neutral-800 rounded-md overflow-hidden hover:bg-neutral-700 transition-all cursor-pointer"
+                  onClick={() => playRecommendedSong(song.id)}
+                >
+                  <div className="p-4 flex items-center gap-4">
+                    <div className="w-16 h-16 flex-shrink-0">
+                      {song.image && (
+                        <img
+                          src={
+                            song.image.find((img) => img.quality === "150x150")
+                              ?.url || song.image[0]?.url
+                          }
+                          alt={song.name}
+                          className="w-full h-full object-cover rounded"
+                        />
+                      )}
+                    </div>
+
+                    <div className="flex-grow min-w-0">
+                      <h3 className="font-medium text-white truncate">
+                        {song.name}
+                      </h3>
+                      <p className="text-zinc-400 text-sm truncate">
+                        {getArtistName(song)}
+                      </p>
+                      <p className="text-zinc-500 text-xs">
+                        {formatTime(song.duration)}
+                      </p>
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="bg-neutral-700 hover:bg-neutral-600 rounded-full h-10 w-10 flex items-center justify-center flex-shrink-0"
+                    >
+                      <Play className="h-5 w-5 ml-0.5" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

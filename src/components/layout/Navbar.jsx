@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "../ui/button";
 import Search from "../ui/search";
@@ -29,34 +29,54 @@ const Logo = () => {
 
 function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const path = location.pathname;
 
+  const handleBackClick = () => {
+    if (path.startsWith("/player/")) {
+      navigate("/dashboard");
+    } else if (path === "/dashboard") {
+      navigate("/");
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
-    <header className="grid gap-2 pt-5 px-5 pb-5 md:px-20 lg:px-32">
-      <div className="flex items-center sm:justify-between w-full gap-2">
-        {path == "/" ? (
-          <div className="flex items-center gap-1">
-            <Logo />
-          </div>
-        ) : (
-          <div className="flex justify-between w-full items-center gap-1">
-            <Logo />
-            <Button className="rounded-full sm:hidden h-8 px-3" asChild>
-              <Link href="/" className="flex items-center gap-1">
-                <ChevronLeft className="w-4 h-4" />
-                Back
-              </Link>
+    <header className="flex flex-col px-4 sm:px-6 md:px-20 lg:px-32 py-6">
+      {/* Mobile layout (stacked) */}
+      <div className="sm:hidden w-full space-y-4">
+        <div className="flex justify-between items-center w-full">
+          <Logo />
+          {path !== "/" && (
+            <Button
+              onClick={handleBackClick}
+              className="rounded-full h-8 px-3 flex items-center gap-1 bg-white text-black"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
             </Button>
-          </div>
-        )}
-        <div className="hidden sm:flex items-center gap-3 w-full max-w-md">
+          )}
+        </div>
+        <div className="w-full">
           <Search />
-          {path != "/" && (
-            <Button className="h-10 px-3 bg-white text-black hover:opacity-90">
-              <Link href="/" className="flex items-center gap-1">
-                <ChevronLeft className="w-4 h-4" />
-                Back
-              </Link>
+        </div>
+      </div>
+
+      {/* Desktop layout (side by side) */}
+      <div className="hidden sm:flex items-center justify-between w-full gap-4">
+        <div className="flex items-center gap-1">
+          <Logo />
+        </div>
+        <div className="flex items-center gap-3 w-full max-w-md">
+          <Search />
+          {path !== "/" && (
+            <Button
+              onClick={handleBackClick}
+              className="h-10 px-3 whitespace-nowrap flex items-center gap-1 bg-white text-black cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
             </Button>
           )}
         </div>
