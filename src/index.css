@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+
+.custom-scroll {
+  overflow-x: auto;
+  scrollbar-width: none; 
+}
+.custom-scroll::-webkit-scrollbar {
+  height: 6px;           
+  opacity: 0;             
+  transition: opacity .25s ease;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.4);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* reveal on hover of the wrapper group */
+.group:hover .custom-scroll::-webkit-scrollbar {
+  opacity: 1 !important;
+}
+.group:hover .custom-scroll {
+  scrollbar-width: thin;                                       
+  scrollbar-color: rgba(255,255,255,0.4) transparent;            
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-appearance: none !important;
+}
+
+
+::-webkit-scrollbar-thumb {
+  background: #7b3306;
+  border-radius: 5px;
+}
+
+
+/* Inter font family */
+.inter-thin {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.inter-light {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.inter-regular {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.inter-medium {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.inter-semibold {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.inter-bold {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Bricolage Grotesque font family */
+.bricolage-thin {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 100;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+.bricolage-light {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+.bricolage-regular {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+.bricolage-medium {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+.bricolage-semibold {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+.bricolage-bold {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+/* General body styling */
+body {
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-optical-sizing: auto;
+  font-variation-settings: "wdth" 100;
+  @apply bg-black text-white;
+}
+
+/* Apply bricolage-regular to all headings by default */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-variation-settings: "wdth" 100;
+}
+
+/* Add Bricolage font to buttons and inputs for consistency */
+button,
+input,
+select,
+textarea {
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+}
