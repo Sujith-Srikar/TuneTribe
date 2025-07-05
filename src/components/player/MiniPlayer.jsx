@@ -6,7 +6,7 @@ import {
   IoChevronForwardSharp,
   IoChevronBackSharp,
 } from "react-icons/io5";
-import { X, ExternalLink } from "lucide-react";
+import { X, ExternalLink, Repeat, Repeat1 } from "lucide-react";
 import { useMusic } from "../../context/MusicProvider";
 import { getSongById } from "../../utils/api";
 import { Slider } from "../ui/slider";
@@ -26,7 +26,10 @@ export default function MiniPlayer() {
   const [audioUrl, setAudioUrl] = useState("");
   const [song, setSong] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
+  const [isLooping, setIsLooping] = useState(false); // Add isLooping state
   const audioRef = useRef(null);
+  const isSeeking = useRef(false);
+  const hasAutoPlayed = useRef(false);
 
   const formatTime = (time) => {
     if (isNaN(time)) return "00:00";
@@ -41,12 +44,37 @@ export default function MiniPlayer() {
   const handleSeek = (value) => {
     if (audioRef.current && value.length > 0) {
       const seekTime = value[0];
+      isSeeking.current = true;
       audioRef.current.currentTime = seekTime;
       setCurrentTime(seekTime);
       setCurrent(seekTime);
+      setTimeout(() => {
+        isSeeking.current = false;
+      }, 100);
     }
   };
 
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (playing) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+    }
+  };
+
+  const loopSong = () => {
+    if (audioRef.current) {
+      const newLoopState = !isLooping;
+      audioRef.current.loop = newLoopState;
+      setIsLooping(newLoopState);
+      // Save loop state to localStorage for persistence
+      localStorage.setItem("is-looping", newLoopState.toString());
+    }
+  };
+
+  // First useEffect: Load song data
   useEffect(() => {
     if (!music) return;
 
@@ -68,11 +96,8 @@ export default function MiniPlayer() {
           if (audioUrl) {
             setAudioUrl(audioUrl);
             localStorage.setItem("last-played", music);
-          } else {
-            console.log("No audio URL found for song");
+            hasAutoPlayed.current = false;
           }
-        } else {
-          console.log("Song data not found");
         }
       } catch (error) {
         console.log("Error playing song in miniplayer: ", error);
@@ -82,41 +107,59 @@ export default function MiniPlayer() {
     getSongDetails();
   }, [music]);
 
-  const togglePlayPause = () => {
-    if (playing) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setPlaying(!playing);
-  };
-
-  const onClose = () => {
-    setMusic(null);
-    setSong(null);
-    setAudioUrl("");
-    localStorage.removeItem("last-played");
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-  };
-
+  // Second useEffect: Setup audio events
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !audioUrl) return;
 
     const handleTimeUpdate = () => {
-      try {
-        setCurrentTime(audio.currentTime);
-        setCurrent(audio.currentTime);
-      } catch (e) {
-        setPlaying(false);
+      if (!isSeeking.current) {
+        const currentTime = audio.currentTime;
+        setCurrentTime(currentTime);
+        setCurrent(currentTime);
       }
     };
 
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
+
+      // Restore loop state from localStorage
+      const savedLoopState = localStorage.getItem("is-looping");
+      if (savedLoopState) {
+        const shouldLoop = savedLoopState === "true";
+        setIsLooping(shouldLoop);
+        audio.loop = shouldLoop;
+      }
+
+      // Sync with global current state (prioritize over localStorage)
+      if (current && !isNaN(parseFloat(current))) {
+        audio.currentTime = parseFloat(current);
+        setCurrentTime(parseFloat(current));
+      } else {
+        // Fallback to localStorage if no global current
+        const savedTime = localStorage.getItem("current-time");
+        if (savedTime && !isNaN(parseFloat(savedTime))) {
+          audio.currentTime = parseFloat(savedTime);
+          setCurrentTime(parseFloat(savedTime));
+        }
+      }
+    };
+
+    const handleCanPlay = () => {
+      // Auto-play when song is first loaded and ready
+      if (!hasAutoPlayed.current) {
+        setPlaying(true);
+        hasAutoPlayed.current = true;
+      }
+    };
+
+    const handleEnded = () => {
+      // Handle song end (only if not looping, as loop is handled automatically)
+      if (!isLooping) {
+        setPlaying(false);
+        setCurrentTime(0);
+        setCurrent(0);
+      }
     };
 
     const handlePlay = () => setPlaying(true);
@@ -124,36 +167,72 @@ export default function MiniPlayer() {
 
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("ended", handleEnded);
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
-
-    // Sync with global current time
-    if (current && !isNaN(parseFloat(current))) {
-      audio.currentTime = parseFloat(current);
-    }
-
-    // Auto-play when song is loaded
-    if (audioUrl && playing) {
-      audio.play().catch((error) => {
-        console.log("Auto-play failed:", error);
-      });
-    }
 
     return () => {
       if (audio) {
         audio.removeEventListener("timeupdate", handleTimeUpdate);
         audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        audio.removeEventListener("canplay", handleCanPlay);
+        audio.removeEventListener("ended", handleEnded);
         audio.removeEventListener("play", handlePlay);
         audio.removeEventListener("pause", handlePause);
       }
     };
-  }, [song, audioUrl, playing, current, setCurrent, setDuration, setPlaying]);
+  }, [audioUrl, current, setCurrent, setDuration, setPlaying, isLooping]);
+
+  // Third useEffect: Handle play/pause state
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !audioUrl) return;
+
+    if (playing) {
+      audio.play().catch((error) => {
+        console.log("Auto-play failed:", error);
+      });
+    } else {
+      audio.pause();
+    }
+  }, [audioUrl, playing]);
+
+  // Fourth useEffect: Sync with global current time when it changes significantly
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !current || isSeeking.current) return;
+
+    const timeDiff = Math.abs(audio.currentTime - current);
+
+    // Only sync if there's a significant difference (> 1 second)
+    if (timeDiff > 1) {
+      audio.currentTime = current;
+      setCurrentTime(current);
+    }
+  }, [current]);
+
+  const onClose = () => {
+    setMusic(null);
+    setSong(null);
+    setAudioUrl("");
+    setIsLooping(false);
+    hasAutoPlayed.current = false;
+    localStorage.removeItem("last-played");
+    localStorage.removeItem("current-time");
+    localStorage.removeItem("is-looping");
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current.loop = false;
+    }
+  };
 
   if (!song) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border dark:border-zinc-700 w-[380px] overflow-hidden">
-      <audio ref={audioRef} src={audioUrl} autoPlay />
+      <audio ref={audioRef} src={audioUrl} />
 
       {/* Progress Bar */}
       <div className="w-full">
@@ -201,19 +280,22 @@ export default function MiniPlayer() {
 
         <div className="flex items-center gap-1">
           <button
-            className="text-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
-            title="Previous"
+            onClick={loopSong}
+            className={`p-1 rounded transition-colors ${
+              isLooping
+                ? "text-amber-500 hover:text-amber-600"
+                : "text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+            }`}
+            title={isLooping ? "Disable loop" : "Enable loop"}
           >
-            <IoChevronBackSharp />
+            {isLooping ? (
+              <Repeat1 className="h-4 w-4" />
+            ) : (
+              <Repeat className="h-4 w-4" />
+            )}
           </button>
           <button onClick={togglePlayPause} className="text-lg mx-1">
             {playing ? <IoPause /> : <IoPlay />}
-          </button>
-          <button
-            className="text-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
-            title="Next"
-          >
-            <IoChevronForwardSharp />
           </button>
           <button
             onClick={onClose}
