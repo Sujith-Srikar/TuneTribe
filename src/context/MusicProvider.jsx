@@ -1,12 +1,10 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext , useState, useContext, useEffect } from "react";
 
 export const MusicContext = createContext(null);
 
 export function MusicProvider({ children }) {
   const [music, setMusic] = useState(null);
-  const [current, setCurrent] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [playing, setPlaying] = useState(false);
+  const [current, setCurrent] = useState(null);
 
   useEffect(() => {
     if (localStorage.getItem("last-played")) {
@@ -15,18 +13,7 @@ export function MusicProvider({ children }) {
   }, []);
 
   return (
-    <MusicContext.Provider
-      value={{
-        music,
-        setMusic,
-        current,
-        setCurrent,
-        duration,
-        setDuration,
-        playing,
-        setPlaying,
-      }}
-    >
+    <MusicContext.Provider value={{ music, setMusic, current, setCurrent }}>
       {children}
     </MusicContext.Provider>
   );
